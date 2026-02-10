@@ -1,29 +1,53 @@
-# Definimos uma "Persona" ou "Instrução de Treinamento" que você pode alterar aqui
-# Isso dita como o agente deve se comportar perante seus artigos
-INSTRUCAO_IA = """
-Você é o Assistente Sênior do BioAiLab. 
-Sua especialidade é correlacionar dados de sensores industriais e biotecnologia.
-Sempre priorize evidências quantitativas e mencione se o artigo é recente (pós-2024).
+import os
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel
+from dotenv import load_dotenv
+from pyzotero import zotero
+from groq import Groq
+
+# 1. Carrega as variáveis de ambiente (.env no local, Config Vars no Render)
+load_dotenv()
+
+# 2. INICIALIZA O APP (O erro estava aqui: esta linha deve vir antes das rotas)
+app = FastAPI()
+
+# 3. Inicializa os clientes das APIs
+zot = zotero.Zotero(os.getenv('ZOTERO_USER_ID'), 'user', os.getenv('ZOTERO_API_KEY'))
+groq_client = Groq(api_key=os.getenv('GROQ_API_KEY'))
+
+# Esta é a parte que você altera para "treinar" o comportamento do Agente
+INSTRUCAO_SISTEMA = """
+Você é um Assistente de Pesquisa Científica de alto nível.
+Sua tarefa é analisar resumos técnicos do Zotero e validar hipóteses.
+Seja sempre formal, técnico e aponte contradições se houver.
 """
 
+class ResearchRequest(BaseModel):
+    hipotese: str
+
+# 4. Agora sim, definimos a rota usando o 'app' já criado
 @app.post("/analisar")
 async def analisar(request: ResearchRequest):
-    # O "treinamento" acontece aqui: unimos a instrução fixa com a dúvida do usuário
-    contexto_zotero = buscar_artigos_zotero() # Sua função de busca
-    
-    prompt_completo = f"""
-    {INSTRUCAO_IA}
-    
-    CONTEXTO DOS ARTIGOS:
-    {contexto_zotero}
-    
-    PERGUNTA/HIPÓTESE:
-    {request.hipotese}
-    """
-    
-    # Chamada para o Groq com a lógica 'treinada'
-    resposta = groq_client.chat.completions.create(
-        messages=[{"role": "system", "content": prompt_completo}],
-        model="llama-3.3-70b-versatile"
-    )
-    return {"analise": resposta.choices[0].message.content}
+    try:
+        # Busca os itens no Zotero
+        items = zot.top(limit=10)
+        
+        contexto = ""
+        for item in items:
+            dados = item['data']
+            titulo = dados.get('title', 'Sem título')
+            resumo = dados.get('abstractNote', 'Sem resumo')
+            contexto += f"TÍTULO: {titulo}\nRESUMO: {resumo}\n---\n"
+
+        # Combina o "treinamento" com os dados e a pergunta
+        prompt_final = f"{INSTRUCAO_SISTEMA}\n\nHIPÓTESE: {request.hipotese}\n\nCONTEXTO:\n{contexto}"
+        
+        chat_completion = groq_client.chat.completions.create(
+            messages=[{"role": "user", "content": prompt_final}],
+            model="llama-3.3-70b-versatile",
+        )
+        
+        return {"resposta": chat_completion.choices[0].message.content}
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
