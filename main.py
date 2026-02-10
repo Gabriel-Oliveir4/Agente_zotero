@@ -6,9 +6,11 @@ from pyzotero import zotero
 from fastapi.middleware.cors import CORSMiddleware
 
 load_dotenv()
+
+# 1. Inicializa o App
 app = FastAPI()
 
-# Configuração de CORS para garantir que o GPT consiga acessar sem bloqueios
+# 2. Configura o CORS (Essencial para o GPT e testes no navegador)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -16,7 +18,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Inicializa apenas o Zotero
+# 3. Conexão com Zotero
 zot = zotero.Zotero(os.getenv('ZOTERO_USER_ID'), 'user', os.getenv('ZOTERO_API_KEY'))
 
 class SearchRequest(BaseModel):
@@ -26,25 +28,23 @@ class SearchRequest(BaseModel):
 @app.post("/buscar_artigos")
 async def buscar_artigos(request: SearchRequest):
     try:
-        # Busca no Zotero (seja por termo ou os mais recentes)
+        # Busca no Zotero
         if request.query:
             items = zot.items(q=request.query)
         else:
             items = zot.top(limit=request.limit)
         
-        lista_artigos = []
+        lista = []
         for item in items:
             dados = item['data']
-            # Enviamos os metadados brutos (como o DOI da Nature)
-            lista_artigos.append({
+            # Captura os dados brutos, incluindo o DOI da Nature
+            lista.append({
                 "titulo": dados.get('title', 'Sem título'),
                 "autor": dados.get('creators', [{}])[0].get('lastName', 'N/A'),
                 "resumo": dados.get('abstractNote', 'Sem resumo'),
                 "doi": dados.get('DOI', 'N/A')
             })
-            
-        return {"artigos": lista_artigos}
+        return {"artigos": lista}
 
     except Exception as e:
-        # Se o erro 403 persistir, ele será capturado aqui
         raise HTTPException(status_code=500, detail=str(e))
