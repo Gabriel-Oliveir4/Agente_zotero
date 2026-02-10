@@ -3,51 +3,48 @@ from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from dotenv import load_dotenv
 from pyzotero import zotero
-from groq import Groq
+from fastapi.middleware.cors import CORSMiddleware
 
-# 1. Carrega as variáveis de ambiente (.env no local, Config Vars no Render)
 load_dotenv()
-
-# 2. INICIALIZA O APP (O erro estava aqui: esta linha deve vir antes das rotas)
 app = FastAPI()
 
-# 3. Inicializa os clientes das APIs
+# Configuração de CORS para garantir que o GPT consiga acessar sem bloqueios
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# Inicializa apenas o Zotero
 zot = zotero.Zotero(os.getenv('ZOTERO_USER_ID'), 'user', os.getenv('ZOTERO_API_KEY'))
-groq_client = Groq(api_key=os.getenv('GROQ_API_KEY'))
 
-# Esta é a parte que você altera para "treinar" o comportamento do Agente
-INSTRUCAO_SISTEMA = """
-Você é um Assistente de Pesquisa Científica de alto nível.
-Sua tarefa é analisar resumos técnicos do Zotero e validar hipóteses.
-Seja sempre formal, técnico e aponte contradições se houver.
-"""
+class SearchRequest(BaseModel):
+    query: str = None
+    limit: int = 10
 
-class ResearchRequest(BaseModel):
-    hipotese: str
-
-# 4. Agora sim, definimos a rota usando o 'app' já criado
-@app.post("/analisar")
-async def analisar(request: ResearchRequest):
+@app.post("/buscar_artigos")
+async def buscar_artigos(request: SearchRequest):
     try:
-        # Busca os itens no Zotero
-        items = zot.top(limit=10)
+        # Busca no Zotero (seja por termo ou os mais recentes)
+        if request.query:
+            items = zot.items(q=request.query)
+        else:
+            items = zot.top(limit=request.limit)
         
-        contexto = ""
+        lista_artigos = []
         for item in items:
             dados = item['data']
-            titulo = dados.get('title', 'Sem título')
-            resumo = dados.get('abstractNote', 'Sem resumo')
-            contexto += f"TÍTULO: {titulo}\nRESUMO: {resumo}\n---\n"
-
-        # Combina o "treinamento" com os dados e a pergunta
-        prompt_final = f"{INSTRUCAO_SISTEMA}\n\nHIPÓTESE: {request.hipotese}\n\nCONTEXTO:\n{contexto}"
-        
-        chat_completion = groq_client.chat.completions.create(
-            messages=[{"role": "user", "content": prompt_final}],
-            model="llama-3.3-70b-versatile",
-        )
-        
-        return {"resposta": chat_completion.choices[0].message.content}
+            # Enviamos os metadados brutos (como o DOI da Nature)
+            lista_artigos.append({
+                "titulo": dados.get('title', 'Sem título'),
+                "autor": dados.get('creators', [{}])[0].get('lastName', 'N/A'),
+                "resumo": dados.get('abstractNote', 'Sem resumo'),
+                "doi": dados.get('DOI', 'N/A')
+            })
+            
+        return {"artigos": lista_artigos}
 
     except Exception as e:
+        # Se o erro 403 persistir, ele será capturado aqui
         raise HTTPException(status_code=500, detail=str(e))
