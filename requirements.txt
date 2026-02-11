@@ -1,6 +1,5 @@
 fastapi
-uvicorn
-pyzotero
-groq
+uvicorn[standard]
 python-dotenv
-pydantic
+pyzotero
+requests
