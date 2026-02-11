@@ -11,7 +11,7 @@ from pyzotero import zotero
 load_dotenv()
 
 app = FastAPI(title="Zotero Bibliotecario API", version="1.1.0")
-
+ 
 # =========================
 # Zotero config (NÃO alterar env vars)
 # =========================
