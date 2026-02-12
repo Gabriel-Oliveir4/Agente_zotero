@@ -2,31 +2,215 @@
 <html lang="pt-br">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Política de Privacidade — Bibliotecário AUFTEK</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="noindex,nofollow" />
+  <title>Política de Privacidade | AUFTEK Zotero Proxy</title>
+  <style>
+    :root{
+      --bg: #0b1020;
+      --card: rgba(255,255,255,0.06);
+      --text: rgba(255,255,255,0.92);
+      --muted: rgba(255,255,255,0.70);
+      --border: rgba(255,255,255,0.12);
+      --accent: #7dd3fc;
+      --accent2:#a78bfa;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+      background:
+        radial-gradient(1200px 500px at 15% 0%, rgba(125,211,252,0.20), transparent 55%),
+        radial-gradient(1000px 600px at 85% 0%, rgba(167,139,250,0.18), transparent 55%),
+        var(--bg);
+      color: var(--text);
+      line-height: 1.55;
+    }
+    a{color: var(--accent); text-decoration: none}
+    a:hover{text-decoration: underline}
+    header{
+      padding: 48px 18px 18px;
+      max-width: 980px;
+      margin: 0 auto;
+    }
+    .badge{
+      display:inline-flex;
+      gap:10px;
+      align-items:center;
+      padding: 8px 12px;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      background: rgba(255,255,255,0.04);
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .dot{
+      width:10px;height:10px;border-radius:999px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      box-shadow: 0 0 0 4px rgba(125,211,252,0.12);
+    }
+    h1{
+      margin: 18px 0 8px;
+      font-size: clamp(28px, 3.2vw, 40px);
+      letter-spacing: -0.02em;
+    }
+    .subtitle{
+      margin: 0;
+      color: var(--muted);
+      max-width: 70ch;
+      font-size: 15px;
+    }
+    main{
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 18px;
+    }
+    .grid{
+      display:grid;
+      grid-template-columns: 1fr;
+      gap: 14px;
+    }
+    @media(min-width: 860px){
+      .grid{grid-template-columns: 1.15fr 0.85fr}
+    }
+    .card{
+      border: 1px solid var(--border);
+      background: var(--card);
+      border-radius: 16px;
+      padding: 18px 18px;
+      backdrop-filter: blur(6px);
+    }
+    .card h2{
+      margin:0 0 10px;
+      font-size: 18px;
+      letter-spacing: -0.01em;
+    }
+    .card p{margin: 10px 0; color: var(--muted)}
+    ul{
+      margin: 10px 0 0;
+      padding-left: 18px;
+      color: var(--muted);
+    }
+    li{margin: 6px 0}
+    .callout{
+      border-left: 3px solid var(--accent);
+      padding: 10px 12px;
+      background: rgba(125,211,252,0.08);
+      border-radius: 12px;
+      color: var(--muted);
+      margin-top: 10px;
+    }
+    .kvs{
+      display:grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+      margin-top: 12px;
+    }
+    .kv{
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 12px 12px;
+      background: rgba(0,0,0,0.14);
+    }
+    .kv b{display:block; color: var(--text); margin-bottom: 6px}
+    footer{
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 22px 18px 48px;
+      color: rgba(255,255,255,0.55);
+      font-size: 13px;
+    }
+    .tiny{
+      font-size: 12px;
+      color: rgba(255,255,255,0.55);
+    }
+  </style>
 </head>
-<body style="font-family: system-ui, Arial; max-width: 900px; margin: 40px auto; line-height: 1.5;">
-  <h1>Política de Privacidade — GPT “Bibliotecário AUFTEK”</h1>
 
-  <h2>1. Finalidade</h2>
-  <p>Este GPT auxilia consultas ao acervo de artigos no Zotero do laboratório, retornando respostas com citações/trechos.</p>
+<body>
+  <header>
+    <span class="badge"><span class="dot"></span> AUFTEK Zotero Proxy • Política de Privacidade</span>
+    <h1>Política de Privacidade</h1>
+    <p class="subtitle">
+      Esta página descreve como a API “AUFTEK Zotero Proxy” processa dados ao buscar referências e evidências no acervo do Zotero
+      para apoiar validação e citações em respostas.
+    </p>
+  </header>
 
-  <h2>2. Dados processados</h2>
-  <ul>
-    <li>Perguntas enviadas pelos usuários ao GPT.</li>
-    <li>Metadados e trechos retornados pela API (título, ano, DOI/URL, evidências/trechos).</li>
-  </ul>
+  <main>
+    <div class="grid">
+      <section class="card">
+        <h2>1) O que este serviço faz</h2>
+        <p>
+          Este serviço fornece endpoints HTTP que consultam a API do Zotero do grupo AUFTEK e retornam
+          (a) referências bibliográficas e (b) trechos (“snippets”) do texto indexado para validação/citação.
+        </p>
 
-  <h2>3. Compartilhamento</h2>
-  <p>As perguntas podem ser enviadas à API hospedada no Render e à API do Zotero apenas para recuperar itens e evidências.</p>
+        <h2>2) Dados processados</h2>
+        <ul>
+          <li>Termos de busca enviados nas requisições (ex.: palavras-chave).</li>
+          <li>Chave do item do Zotero (<span class="tiny">itemKey</span>) quando solicitada evidência.</li>
+          <li>Metadados e trechos retornados pela API do Zotero.</li>
+        </ul>
 
-  <h2>4. Armazenamento</h2>
-  <p>Podem existir logs técnicos mínimos no provedor de hospedagem para diagnóstico.</p>
+        <div class="callout">
+          <b>Recomendação:</b> não envie dados sensíveis (ex.: informações pessoais, dados clínicos identificáveis) como termos de busca.
+        </div>
 
-  <h2>5. Segurança</h2>
-  <p>A API exige autenticação por chave e deve ser usada apenas por membros autorizados do laboratório.</p>
+        <h2 style="margin-top:16px;">3) Armazenamento e retenção</h2>
+        <p>
+          O serviço não foi projetado para armazenar conteúdo de usuários nem persistir trechos retornados.
+          Podem existir logs técnicos mínimos do servidor (ex.: data/hora, endpoint e códigos de erro) apenas para diagnóstico e estabilidade.
+        </p>
 
-  <h2>6. Contato</h2>
-  <p>Responsável: ARLINDO LINDO — Contato: ARLINDO_LINDO@HOTMAIL.COM</p>
+        <h2>4) Compartilhamento</h2>
+        <p>
+          O serviço se comunica com a API do Zotero para obter os dados do acervo. Não vendemos dados e não compartilhamos informações com terceiros,
+          exceto o necessário para realizar a consulta ao Zotero.
+        </p>
+
+        <h2>5) Segurança</h2>
+        <p>
+          As rotas que retornam dados do acervo exigem autenticação via chave de acesso (header <span class="tiny">X-AGENT-KEY</span> ou
+          <span class="tiny">Authorization: Bearer</span>), conforme configuração do integrador.
+        </p>
+
+        <h2>6) Contato</h2>
+        <p>
+          Dúvidas ou solicitações relacionadas a esta política: <a href="mailto:contato@auftek.com.br">contato@auftek.com.br</a>
+        </p>
+      </section>
+
+      <aside class="card">
+        <h2>Resumo rápido</h2>
+        <div class="kvs">
+          <div class="kv">
+            <b>Finalidade</b>
+            <div class="tiny">Buscar referências e evidências no Zotero para validação/citações.</div>
+          </div>
+          <div class="kv">
+            <b>Dados que você envia</b>
+            <div class="tiny">Palavras-chave e, quando aplicável, o itemKey do Zotero.</div>
+          </div>
+          <div class="kv">
+            <b>Armazenamento</b>
+            <div class="tiny">Sem armazenamento de conteúdo por design; logs técnicos mínimos podem existir.</div>
+          </div>
+          <div class="kv">
+            <b>Terceiros</b>
+            <div class="tiny">Somente Zotero (para consultas ao acervo).</div>
+          </div>
+          <div class="kv">
+            <b>Última atualização</b>
+            <div class="tiny">12 de fevereiro de 2026</div>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </main>
+
+  <footer>
+    <div>© AUFTEK — Zotero Proxy. Esta política pode ser atualizada para refletir melhorias de segurança e mudanças operacionais.</div>
+  </footer>
 </body>
 </html>
